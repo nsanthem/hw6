@@ -43,20 +43,31 @@ let movies = json.results
   // </div>
   // ⬇️ ⬇️ ⬇️
 
+    
+
 for (let i = 0; i < movies.length; i++) {
   let movieId = movies[i].id 
   let movieImage = movies[i].poster_path
   // console.log(movieId)
 
+let docRef = await db.collection('watched').doc(`${movieId}`).get()
+let movieWatched = docRef.data()
+console.log(movieWatched)
+
+if (movieWatched) {
   document.querySelector('.movies').insertAdjacentHTML('beforeend',`
-    <div class="movie-${movieId} w-1/5 p-4">
+    <div class="movie-${movieId} w-1/5 p-4 opacity-20">
     <img src="https://image.tmdb.org/t/p/w500/${movieImage}" class="w-full">
     <a href="#" class="watched-button block text-center text-white bg-green-500 mt-4 px-4 py-2 rounded">I've watched this!</a>
     </div>
   `)
+} else  document.querySelector('.movies').insertAdjacentHTML('beforeend',`
+<div class="movie-${movieId} w-1/5 p-4">
+<img src="https://image.tmdb.org/t/p/w500/${movieImage}" class="w-full">
+<a href="#" class="watched-button block text-center text-white bg-green-500 mt-4 px-4 py-2 rounded">I've watched this!</a>
+</div>
+`)
   
-
-
   // ⬆️ ⬆️ ⬆️ 
   // End Step 2
 
@@ -72,30 +83,13 @@ for (let i = 0; i < movies.length; i++) {
   //   to remove the class if the element already contains it.
   // ⬇️ ⬇️ ⬇️
 
+
   document.querySelector(`.movie-${movieId} .watched-button`).addEventListener('click',async function(event){
   event.preventDefault()
   console.log(`movie ${movieId} watch button clicked!`)
   document.querySelector(`.movie-${movieId}`).classList.add('opacity-20')
 
-  await db.collection('watched').add({movieId: movieId})
-
-  let querySnapshot = await db.collection('watched').get()
-  let moviesWatched = querySnapshot.docs
-  console.log(moviesWatched)
-    
-  for(let x=0; x < moviesWatched.length; x++) {
-   if(moviesWatched[x].data() == `${movieId}`) {
-   let watchedId= moviesWatched[x].data()
-   let moviesWatchedId= watchedId.data.value
-  console.log(moviesWatchedId)
-          
-  document.querySelector(`movie-${movieId}`).classList.add('opacity-20')
-        
-      }   
-
-
-  }
-
+  await db.collection('watched').doc(`${movieId}`).set({})
 
 })
 }
